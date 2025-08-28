@@ -1,0 +1,21 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.bg-black
+{
+    margin-bottom: 2vh;
+    background: rgb(131, 239, 107);
+    color: rgb(104, 240, 116);
+    border: 2px solid white;
+    align-items: center;
+}
+.text-white
+{
+    color: black;
+    font-size: large;
+}
+.h-full
+{
+    height: full;
+}
