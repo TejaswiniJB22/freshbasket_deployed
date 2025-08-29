@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import { useLocation } from "react-router-dom";
-import axios from "axios";
 
 const Checkout = () => {
   const { state } = useLocation();
@@ -22,21 +21,16 @@ const Checkout = () => {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
 
-    try {
-      // Optional: Save order in backend
-      await axios.post("http://localhost:5000/api/orders", {
-        ...formData,
-        cartItems,
-      });
+    console.log("Order Submitted ✅", {
+      ...formData,
+      cartItems,
+    });
 
-      setSuccess(true); // ✅ change button text
-    } catch (err) {
-      console.error("Error placing order:", err);
-      alert("Something went wrong. Please try again.");
-    }
+    // ✅ Just mark success (no backend needed)
+    setSuccess(true);
   };
 
   const totalPrice = cartItems.reduce(
@@ -142,4 +136,3 @@ const Checkout = () => {
 };
 
 export default Checkout;
-
