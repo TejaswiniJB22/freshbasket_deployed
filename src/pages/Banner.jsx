@@ -15,7 +15,7 @@ const Banner = () => {
       setTypedText(fullText.slice(0, index + 1));
       index++;
       if (index === fullText.length) clearInterval(interval);
-    }, 150); 
+    }, 150);
     return () => clearInterval(interval);
   }, []);
 
@@ -23,30 +23,37 @@ const Banner = () => {
     <>
       <Header />
       <section
-        className="h-[85vh] relative flex items-center justify-center bg-cover bg-center"
-        style={{ backgroundImage: `url('${API_URL}/Images/banner7.jpg')` }}
+        className="relative h-[90vh] flex items-center justify-center text-center bg-cover bg-center"
+        style={{
+          backgroundImage: `url('${API_URL}/Images/banner7.jpg')`,
+        }}
       >
-        <div className="absolute inset-0 bg-gradient-to-b from-white/10 via-green-50/30 to-white/10"></div>
+        {/* Light overlay for brightness */}
+        <div className="absolute inset-0 bg-white bg-opacity-20"></div>
 
-        <div className="relative z-10 text-center p-8 sm:p-16">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-green-800 mb-4 drop-shadow-md">
-            {typedText}
+        {/* Content */}
+        <div className="relative z-10 max-w-2xl px-6">
+          <h1 className="text-5xl md:text-6xl lg:text-7xl font-extrabold drop-shadow mb-4">
+            <span className="text-green-600">{typedText}</span>
             <span className="blinking-cursor">|</span>
           </h1>
 
-          <p className="text-green-700 text-lg sm:text-xl mb-6">
-            Get the best quality fruits delivered to your doorstep
+          <p className="text-gray-900 mt-4 text-lg leading-relaxed font-medium">
+            Discover the joy of fresh fruits with <span className="text-green-600 font-semibold">Fresh_Basket</span>. 
+            From seasonal favorites to exotic varieties, we bring the best of nature 
+            directly to your home. Healthy, delicious, and convenient – freshness in every bite.
           </p>
 
           <button
             onClick={() => navigate("/products")}
-            className="px-8 py-3 bg-green-500 text-white rounded-2xl font-semibold shadow-lg hover:bg-blue-600 hover:scale-105 transition-all duration-300"
+            className="mt-8 px-10 py-4 bg-green-500 text-white text-lg rounded-xl shadow-lg hover:bg-green-600 transform transition-all hover:scale-110"
           >
-            Shop Now
+            Start Shopping
           </button>
         </div>
       </section>
 
+      {/* Blinking cursor style */}
       <style>{`
         .blinking-cursor {
           font-weight: 100;
