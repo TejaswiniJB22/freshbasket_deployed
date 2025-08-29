@@ -8,7 +8,7 @@ const About = () => {
       {/* Hero Section with Banner */}
       <div className="relative h-64 md:h-80 w-full">
         <img
-          src={`${API_URL}/Images/about-banner.jpg`}
+          src={`https://i.postimg.cc/ncFtd3TR/IMG-20250824-WA0071.jpg`}
           alt="About Us Banner"
           className="w-full h-full object-cover rounded-b-2xl brightness-110"
         />
