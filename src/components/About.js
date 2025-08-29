@@ -1,47 +1,57 @@
 import React from "react";
 
+const API_URL = "https://freshbasket-backend-upwe.onrender.com";
+
 const About = () => {
   return (
-    <>
-
-      {/* Hero Section */}
-      <section className="h-[60vh] flex items-center justify-center bg-gradient-to-r from-green-100 to-green-200">
-        <div className="p-8 rounded-xl text-center">
-          <h1 className="text-4xl sm:text-5xl font-bold text-green-900 mb-4 drop-shadow-lg">
-            About Fruit_Basket
+    <div className="flex flex-col items-center justify-center">
+      {/* Hero Section with Banner */}
+      <div className="relative h-64 md:h-80 w-full">
+        <img
+          src={`${API_URL}/Images/about-banner.jpg`}
+          alt="About Us Banner"
+          className="w-full h-full object-cover rounded-b-2xl brightness-110"
+        />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <h1 className="text-4xl md:text-5xl font-extrabold text-white drop-shadow-[0_3px_6px_rgba(0,0,0,0.6)]">
+            About Us
           </h1>
-          <p className="text-gray-700 text-lg sm:text-xl">
-            Freshness and quality delivered straight to your doorstep
-          </p>
         </div>
-      </section>
+      </div>
 
-      {/* Our Story Section */}
-      <section className="py-20 px-6 sm:px-16 max-w-4xl mx-auto text-center bg-white rounded-xl shadow-md">
-        <h2 className="text-3xl sm:text-4xl font-bold text-green-800 mb-8">
-          Our Story
-        </h2>
-        <p className="text-gray-700 text-lg sm:text-xl leading-relaxed mb-6">
-          At <span className="font-semibold text-green-700">Fruit_Basket</span>, we provide fresh, organic fruits directly from local farms to your home.  
-          Our focus is on <span className="font-semibold">quality, sustainability, and customer happiness</span>.
+      {/* About Content */}
+      <div className="max-w-4xl px-6 md:px-12 py-12 text-center">
+        <p className="text-gray-700 text-lg mb-6">
+          Welcome to{" "}
+          <span className="font-bold text-green-600">Fruit_Basket</span> – 
+          your trusted source for the freshest fruits delivered right to your doorstep.
         </p>
-        <p className="text-gray-700 text-lg sm:text-xl leading-relaxed">
-          Every fruit is carefully selected to ensure it reaches you fresh, delicious, and nutritious.  
-          Experience the taste of nature with every bite!
-        </p>
-      </section>
 
-      {/* Call to Action */}
-      <section className="py-16 text-center bg-green-50">
-        <button
-          onClick={() => window.location.href = "/products"}
-          className="px-10 py-4 bg-green-500 text-white rounded-3xl font-semibold shadow-lg hover:bg-blue-600 hover:scale-105 transform transition-all duration-300"
-        >
-          Explore Our Fruits
-        </button>
-      </section>
+        {/* Mission Section */}
+        <div className="text-left mt-8">
+          <h2 className="text-2xl font-bold text-purple-700 mb-4 flex items-center">
+            🌱 Our Mission
+          </h2>
+          <ul className="list-disc pl-6 space-y-2 text-gray-700">
+            <li>Deliver fresh, nutritious, and affordable fruits.</li>
+            <li>Support local farmers and sustainable practices.</li>
+            <li>Promote healthy lifestyles through natural food choices.</li>
+          </ul>
+        </div>
 
-    </>
+        {/* Why Choose Us Section */}
+        <div className="text-left mt-8">
+          <h2 className="text-2xl font-bold text-red-600 mb-4 flex items-center">
+            🍎 Why Choose Us?
+          </h2>
+          <ul className="list-disc pl-6 space-y-2 text-gray-700">
+            <li>Handpicked seasonal fruits.</li>
+            <li>Fast and eco-friendly delivery.</li>
+            <li>Trusted by thousands of happy customers.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
   );
 };
 
