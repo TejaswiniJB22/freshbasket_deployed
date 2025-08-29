@@ -3,7 +3,6 @@ import { useLocation } from "react-router-dom";
 import axios from "axios";
 
 const Checkout = () => {
-  // ✅ Get cart items passed from Cart.jsx
   const { state } = useLocation();
   const cartItems = state?.cartItems || [];
 
@@ -24,127 +23,75 @@ const Checkout = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     try {
-      // Optional: Save order in backend
       await axios.post("http://localhost:5000/api/orders", {
         ...formData,
         cartItems,
       });
-
       setSuccess(true);
     } catch (err) {
       console.error("Error placing order:", err);
-      alert("Something went wrong. Please try again.");
     }
   };
 
-  const totalPrice = cartItems.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  );
-
   if (success) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-gray-100">
-        <div className="bg-white p-8 rounded-lg shadow-lg text-center">
-          <h1 className="text-2xl font-bold text-green-600">
-            🎉 Order Placed Successfully!
-          </h1>
-          <p className="mt-2 text-gray-600">Thank you for shopping with us.</p>
-        </div>
-      </div>
-    );
+    return <h2 className="text-center text-green-600">🎉 Order Placed Successfully!</h2>;
+  }
+
+  if (cartItems.length === 0) {
+    return <h2 className="text-center text-red-600">⚠ No cart data received in Checkout</h2>;
   }
 
   return (
     <div className="p-8 bg-gray-100 min-h-screen">
       <h1 className="text-3xl font-bold mb-6 text-center">Checkout</h1>
 
-      {cartItems.length === 0 ? (
-        <p className="text-center text-gray-600">⚠ No items passed to checkout.</p>
-      ) : (
-        <div className="space-y-6 max-w-5xl mx-auto">
-          {/* Cart Summary */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-2xl font-semibold mb-4">Order Summary</h2>
-            {cartItems.map((item) => (
-              <div key={item._id} className="flex items-center justify-between mb-4">
-                <div className="flex items-center">
-                  <img
-                    src={`http://localhost:5000/Images/${item.image}`}
-                    alt={item.productName}
-                    className="h-20 w-20 object-contain rounded mr-4"
-                  />
-                  <div>
-                    <h3 className="font-medium">{item.productName}</h3>
-                    <p className="text-gray-600 text-sm">
-                      {item.quantity} × ₹{item.price} = ₹
-                      {item.quantity * item.price}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-            <div className="mt-4 text-right font-bold text-xl">
-              Total: <span className="text-green-600">₹{totalPrice}</span>
-            </div>
-          </div>
+      {/* Form */}
+      <form onSubmit={handleSubmit} className="bg-white shadow-lg rounded-lg p-6 space-y-4 max-w-md mx-auto">
+        <input
+          type="text"
+          name="name"
+          placeholder="Full Name"
+          value={formData.name}
+          onChange={handleChange}
+          required
+          className="w-full p-3 border rounded"
+        />
+        <input
+          type="email"
+          name="email"
+          placeholder="Email Address"
+          value={formData.email}
+          onChange={handleChange}
+          required
+          className="w-full p-3 border rounded"
+        />
+        <input
+          type="text"
+          name="address"
+          placeholder="Delivery Address"
+          value={formData.address}
+          onChange={handleChange}
+          required
+          className="w-full p-3 border rounded"
+        />
+        <input
+          type="tel"
+          name="phone"
+          placeholder="Phone Number"
+          value={formData.phone}
+          onChange={handleChange}
+          required
+          className="w-full p-3 border rounded"
+        />
 
-          {/* Billing Form */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-2xl font-semibold mb-4">Billing Details</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="text"
-                name="name"
-                placeholder="Full Name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className="w-full p-3 border rounded"
-              />
-
-              <input
-                type="email"
-                name="email"
-                placeholder="Email Address"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="w-full p-3 border rounded"
-              />
-
-              <input
-                type="text"
-                name="address"
-                placeholder="Delivery Address"
-                value={formData.address}
-                onChange={handleChange}
-                required
-                className="w-full p-3 border rounded"
-              />
-
-              <input
-                type="tel"
-                name="phone"
-                placeholder="Phone Number"
-                value={formData.phone}
-                onChange={handleChange}
-                required
-                className="w-full p-3 border rounded"
-              />
-
-              <button
-                type="submit"
-                className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 transition"
-              >
-                Place Order
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
+        <button
+          type="submit"
+          className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 transition"
+        >
+          Place Order
+        </button>
+      </form>
     </div>
   );
 };
