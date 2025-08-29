@@ -1,8 +1,12 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 
 const Checkout = () => {
-  const [cartItems, setCartItems] = useState([]);
+  // ✅ Get cart items passed from Cart.jsx
+  const { state } = useLocation();
+  const cartItems = state?.cartItems || [];
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -10,34 +14,6 @@ const Checkout = () => {
     phone: "",
   });
   const [success, setSuccess] = useState(false);
-
-  // Fetch cart items
-  const fetchCart = async () => {
-    try {
-      const res = await axios.get("http://localhost:5000/api/cart");
-      setCartItems(res.data);
-    } catch (err) {
-      console.error("Error fetching cart:", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchCart();
-  }, []);
-
-  // Clear the cart after successful checkout
-  const clearCart = async () => {
-    try {
-      await Promise.all(
-        cartItems.map((item) =>
-          axios.delete(`http://localhost:5000/api/cart/${item._id}`)
-        )
-      );
-      setCartItems([]);
-    } catch (err) {
-      console.error("Error clearing cart:", err);
-    }
-  };
 
   const handleChange = (e) => {
     setFormData({
@@ -50,14 +26,13 @@ const Checkout = () => {
     e.preventDefault();
 
     try {
-      // (Optional) Save order in backend
+      // Optional: Save order in backend
       await axios.post("http://localhost:5000/api/orders", {
         ...formData,
         cartItems,
       });
 
       setSuccess(true);
-      clearCart();
     } catch (err) {
       console.error("Error placing order:", err);
       alert("Something went wrong. Please try again.");
@@ -87,17 +62,14 @@ const Checkout = () => {
       <h1 className="text-3xl font-bold mb-6 text-center">Checkout</h1>
 
       {cartItems.length === 0 ? (
-        <p className="text-center text-gray-600">Your cart is empty.</p>
+        <p className="text-center text-gray-600">⚠ No items passed to checkout.</p>
       ) : (
         <div className="space-y-6 max-w-5xl mx-auto">
           {/* Cart Summary */}
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-2xl font-semibold mb-4">Order Summary</h2>
             {cartItems.map((item) => (
-              <div
-                key={item._id}
-                className="flex items-center justify-between mb-4"
-              >
+              <div key={item._id} className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
                   <img
                     src={`http://localhost:5000/Images/${item.image}`}
@@ -178,4 +150,3 @@ const Checkout = () => {
 };
 
 export default Checkout;
-
