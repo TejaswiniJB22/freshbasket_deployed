@@ -9,13 +9,21 @@ const Checkout = () => {
   const { cartItems = [] } = location.state || {};
 
   const [form, setForm] = useState({ name: "", address: "", phone: "" });
-  const [orderPlaced, setOrderPlaced] = useState(false);
+  const [error, setError] = useState("");
+  const [showToast, setShowToast] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
+    setError(""); // clear error when typing
   };
 
   const handlePlaceOrder = async () => {
+    // ✅ Validate form
+    if (!form.name || !form.address || !form.phone) {
+      setError("⚠️ Please fill all the fields before placing order.");
+      return;
+    }
+
     try {
       // Save checkout details
       await axios.post(`${API_URL}/api/checkout`, {
@@ -29,28 +37,22 @@ const Checkout = () => {
         await axios.delete(`${API_URL}/api/cart/${item._id}`);
       }
 
-      // Show success message
-      setOrderPlaced(true);
+      // Show success toast
+      setShowToast(true);
+      setForm({ name: "", address: "", phone: "" });
+
+      // Hide toast after 3 seconds
+      setTimeout(() => {
+        setShowToast(false);
+      }, 3000);
     } catch (err) {
       console.error("Error placing order:", err);
-      alert("Failed to place order");
+      setError("❌ Failed to place order, please try again.");
     }
   };
 
-  // ✅ If order placed, show green success message instead of form
-  if (orderPlaced) {
-    return (
-      <div className="flex items-center justify-center min-h-screen bg-green-100">
-        <div className="bg-green-600 text-white p-10 rounded-2xl shadow-lg text-center">
-          <h1 className="text-3xl font-bold mb-4">🎉 Order Placed Successfully!</h1>
-          <p className="text-lg">Thanks for shopping with <span className="font-semibold">FreshBasket</span> 🛒</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="p-8 bg-gray-100 min-h-screen">
+    <div className="p-8 bg-gray-100 min-h-screen relative">
       <h1 className="text-3xl font-bold mb-6 text-center">Checkout</h1>
 
       {cartItems.length === 0 ? (
@@ -73,7 +75,7 @@ const Checkout = () => {
             <input
               type="text"
               name="name"
-              placeholder="Full Name"
+              placeholder="Full Name *"
               value={form.name}
               onChange={handleChange}
               className="w-full border rounded px-3 py-2"
@@ -81,7 +83,7 @@ const Checkout = () => {
             <input
               type="text"
               name="address"
-              placeholder="Address"
+              placeholder="Address *"
               value={form.address}
               onChange={handleChange}
               className="w-full border rounded px-3 py-2"
@@ -89,11 +91,14 @@ const Checkout = () => {
             <input
               type="text"
               name="phone"
-              placeholder="Phone Number"
+              placeholder="Phone Number *"
               value={form.phone}
               onChange={handleChange}
               className="w-full border rounded px-3 py-2"
             />
+
+            {error && <p className="text-red-600 text-sm">{error}</p>}
+
             <button
               onClick={handlePlaceOrder}
               className="bg-green-600 text-white px-6 py-3 rounded hover:bg-green-700 transition"
@@ -101,6 +106,13 @@ const Checkout = () => {
               Place Order
             </button>
           </div>
+        </div>
+      )}
+
+      {/* ✅ Toast Popup */}
+      {showToast && (
+        <div className="fixed top-5 right-5 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg animate-bounce">
+          🎉 Order placed successfully! <br /> Thanks for shopping with <b>FreshBasket</b> 🛒
         </div>
       )}
     </div>
