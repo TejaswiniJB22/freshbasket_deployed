@@ -1,45 +1,77 @@
-import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import axios from "axios";
-
-import Header from "./pages/Header";
-import Products from "./pages/Products";
-import Cart from "./pages/Cart";
+import { BrowserRouter as Router, Routes, Route, RouterProvider } from "react-router-dom";
+import Home from "./components/Home";
+import About from "./components/About";
+import Contact from "./components/Contact";
 import Checkout from "./components/Checkout";
+import { createBrowserRouter } from "react-router-dom";
+import Header from "./pages/Header";
+// import Products from "./pages/products.jsx";
+import Products from "./pages/Products.jsx";
+import ProductDetail from "./pages/ProductDetails.jsx";
+import Cart from "./pages/Cart.js";
 
-const API_URL = "https://freshbasket-backend-upwe.onrender.com";
+const router=createBrowserRouter(
+  [
+    {
+      path:'/',
+      element:
+      <div>
+        <Home/>
+      </div>
+      
+    },
+     {
+      path:'/about',
+      element:<div>
+        <Header/>
+        <About/>
+      </div>
+    },
+    {
+      path:'/products',
+      element:<div>
+        <Header/>
+        <Products/>
+      </div>
+
+    },
+    {
+      path:'/product/:id',
+      element:<div>
+        <Header/>
+        <ProductDetail/>
+      </div>
+    },
+    
+     {
+      path:'/contact',
+      element:<div>
+        <Header/>
+        <Contact/>
+      </div>
+    },
+     {
+    path: "/cart",   // <-- Cart route
+    element: <div>
+      <Header/>
+      <Cart/>
+    </div>
+  },
+     {
+      path:'/checkout',
+      element:<div>
+        <Header/>
+        <Checkout/>
+      </div>
+    }
+    
+
+  ]
+)
 
 function App() {
-  const [cartCount, setCartCount] = useState(0);
-
-  // fetch cart count initially
-  const fetchCartCount = async () => {
-    try {
-      const res = await axios.get(`${API_URL}/api/cart`);
-      setCartCount(res.data.length);
-    } catch (err) {
-      console.error("Error fetching cart count:", err);
-    }
-  };
-
-  useEffect(() => {
-    fetchCartCount();
-  }, []);
-
   return (
-    <Router>
-      {/* Pass cartCount and updater to header */}
-      <Header cartCount={cartCount} />
-
-      <Routes>
-        <Route path="/" element={<Products setCartCount={setCartCount} />} />
-        <Route
-          path="/cart"
-          element={<Cart setCartCount={setCartCount} />}
-        />
-        <Route path="/checkout" element={<Checkout setCartCount={setCartCount} />} />
-      </Routes>
-    </Router>
+   <RouterProvider router={router}/>
   );
 }
 
