@@ -17,7 +17,6 @@ const Checkout = () => {
 
   // ✅ Load items from Cart.js or fallback to full cart
   useEffect(() => {
-    console.log("Checkout received state:", location.state);
     if (location.state?.cartItems && location.state.cartItems.length > 0) {
       setCartItems(location.state.cartItems);
     } else {
@@ -39,18 +38,27 @@ const Checkout = () => {
   };
 
   // ✅ Place order
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!formData.name || !formData.address || !formData.phone) {
       alert("Please fill in all required fields.");
       return;
     }
 
-    setOrderPlaced(true);
+    try {
+      // ✅ Clear items from backend cart
+      for (let item of cartItems) {
+        await axios.delete(`${API_URL}/api/cart/${item._id}`);
+      }
 
-    // ✅ After showing success screen, navigate back to cart after 2s
-    setTimeout(() => {
-      navigate("/cart");
-    }, 2000);
+      setOrderPlaced(true);
+
+      // ✅ After showing success screen, navigate back to cart after 2s
+      setTimeout(() => {
+        navigate("/cart");
+      }, 2000);
+    } catch (err) {
+      console.error("Error clearing cart after order:", err);
+    }
   };
 
   if (orderPlaced) {
