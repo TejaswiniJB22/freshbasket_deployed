@@ -1,36 +1,35 @@
+
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { useLocation } from "react-router-dom";
 
 const API_URL = "https://freshbasket-backend-upwe.onrender.com";
 
 export default function Checkout() {
+  const location = useLocation();
+  const buyNowItem = location.state?.buyNowItem || null;
+
   const [cartItems, setCartItems] = useState([]);
-  const [formData, setFormData] = useState({
-    name: "",
-    address: "",
-    phone: "",
-  });
+  const [formData, setFormData] = useState({ name: "", address: "", phone: "" });
   const [errors, setErrors] = useState({});
   const [orderPlaced, setOrderPlaced] = useState(false);
 
-  // ✅ Fetch Cart Items
+  // ✅ Fetch Cart only if not BuyNow
   useEffect(() => {
-    const fetchCart = async () => {
-      try {
-        const res = await axios.get(`${API_URL}/api/cart`);
-        setCartItems(res.data);
-      } catch (err) {
-        console.error("Error fetching cart:", err);
-      }
-    };
-    fetchCart();
-  }, []);
+    if (!buyNowItem) {
+      const fetchCart = async () => {
+        try {
+          const res = await axios.get(`${API_URL}/api/cart`);
+          setCartItems(res.data);
+        } catch (err) {
+          console.error("Error fetching cart:", err);
+        }
+      };
+      fetchCart();
+    }
+  }, [buyNowItem]);
 
-  // ✅ Handle Form Input
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-    setErrors({ ...errors, [e.target.name]: "" });
-  };
+  const itemsToShow = buyNowItem ? [buyNowItem] : cartItems;
 
   // ✅ Place Order
   const handlePlaceOrder = async () => {
@@ -47,13 +46,14 @@ export default function Checkout() {
     try {
       await axios.post(`${API_URL}/api/orders`, {
         customer: formData,
-        items: cartItems,
+        items: itemsToShow,
       });
 
-      // ✅ Clear cart after order
-      await axios.delete(`${API_URL}/api/cart/clear`);
+      if (!buyNowItem) {
+        await axios.delete(`${API_URL}/api/cart/clear`);
+      }
 
-      setOrderPlaced(true); // Show green success screen
+      setOrderPlaced(true);
     } catch (err) {
       console.error("Error placing order:", err);
     }
@@ -77,10 +77,10 @@ export default function Checkout() {
       {/* ✅ Order Summary */}
       <div className="bg-white shadow rounded-lg p-4 mb-6">
         <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
-        {cartItems.length === 0 ? (
+        {itemsToShow.length === 0 ? (
           <p className="text-gray-500">Your cart is empty.</p>
         ) : (
-          cartItems.map((item) => (
+          itemsToShow.map((item) => (
             <div key={item._id} className="flex items-center space-x-3 mb-2">
               <img
                 src={item.image}
@@ -106,7 +106,7 @@ export default function Checkout() {
               name="name"
               className="w-full border rounded p-2"
               value={formData.name}
-              onChange={handleChange}
+              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             />
             {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
           </div>
@@ -118,7 +118,7 @@ export default function Checkout() {
               name="address"
               className="w-full border rounded p-2"
               value={formData.address}
-              onChange={handleChange}
+              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
             />
             {errors.address && <p className="text-red-500 text-sm">{errors.address}</p>}
           </div>
@@ -130,7 +130,7 @@ export default function Checkout() {
               name="phone"
               className="w-full border rounded p-2"
               value={formData.phone}
-              onChange={handleChange}
+              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
             />
             {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
           </div>
