@@ -1,21 +1,20 @@
-import React, { useState, useEffect } from "react";
-import axios from "axios";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
+import axios from "axios";
 
 const API_URL = "https://freshbasket-backend-upwe.onrender.com";
 
-export default function Checkout() {
+const Checkout = () => {
   const location = useLocation();
-  const buyNowItem = location.state?.buyNowItem || null;
-
   const [cartItems, setCartItems] = useState([]);
-  const [formData, setFormData] = useState({ name: "", address: "", phone: "" });
-  const [errors, setErrors] = useState({});
-  const [orderPlaced, setOrderPlaced] = useState(false);
 
-  // ✅ Fetch cart only if NOT buyNow
+  // Read items passed from Cart.js
   useEffect(() => {
-    if (!buyNowItem) {
+    if (location.state?.cartItems) {
+      // ✅ Use items sent from Cart (either single Buy Now or full cart)
+      setCartItems(location.state.cartItems);
+    } else {
+      // ✅ Fallback: fetch full cart if nothing passed
       const fetchCart = async () => {
         try {
           const res = await axios.get(`${API_URL}/api/cart`);
@@ -26,123 +25,36 @@ export default function Checkout() {
       };
       fetchCart();
     }
-  }, [buyNowItem]);
-
-  // ✅ If buyNow, show only that item, else show cart
-  const itemsToShow = buyNowItem ? [buyNowItem] : cartItems;
-
-  const handlePlaceOrder = async () => {
-    let newErrors = {};
-    if (!formData.name) newErrors.name = "Name is required";
-    if (!formData.address) newErrors.address = "Address is required";
-    if (!formData.phone) newErrors.phone = "Phone is required";
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-
-    try {
-      await axios.post(`${API_URL}/api/orders`, {
-        customer: formData,
-        items: itemsToShow,
-      });
-
-      if (!buyNowItem) {
-        await axios.delete(`${API_URL}/api/cart/clear`);
-      }
-
-      setOrderPlaced(true);
-    } catch (err) {
-      console.error("Error placing order:", err);
-    }
-  };
-
-  if (orderPlaced) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-green-600 text-white text-center">
-        <div>
-          <h1 className="text-3xl font-bold mb-4">🎉 Order Placed Successfully!</h1>
-          <p className="text-lg">Thanks for shopping with FreshBasket 🛒</p>
-        </div>
-      </div>
-    );
-  }
+  }, [location.state]);
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <h1 className="text-2xl font-bold text-center mb-6">Checkout</h1>
+    <div className="p-8 bg-gray-50 min-h-screen">
+      <h1 className="text-2xl font-bold mb-6 text-center">Checkout</h1>
 
-      {/* ✅ Order Summary */}
-      <div className="bg-white shadow rounded-lg p-4 mb-6">
-        <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
-        {itemsToShow.length === 0 ? (
-          <p className="text-gray-500">Your cart is empty.</p>
-        ) : (
-          itemsToShow.map((item) => (
-            <div key={item._id} className="flex items-center space-x-3 mb-2">
-              <img
-                src={item.image}
-                alt={item.productName}
-                className="w-12 h-12 object-cover rounded"
-              />
+      {/* Order Summary */}
+      <div className="bg-white rounded-lg shadow p-6 mb-6">
+        <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
+        {cartItems.map((item) => (
+          <div key={item._id} className="flex items-center mb-4">
+            <img
+              src={`${API_URL}/Images/${item.image}`}
+              alt={item.productName}
+              className="h-20 w-20 object-contain rounded mr-4"
+            />
+            <div>
+              <p className="font-medium">{item.productName}</p>
               <p>
-                {item.productName} × {item.quantity} = ₹{item.price * item.quantity}
+                {item.quantity} × ₹{item.price} = ₹
+                {item.quantity * item.price}
               </p>
             </div>
-          ))
-        )}
+          </div>
+        ))}
       </div>
 
-      {/* ✅ Checkout Form */}
-      <div className="bg-white shadow rounded-lg p-4 mb-6">
-        <h2 className="text-xl font-semibold mb-4">Shipping Details</h2>
-        <div className="space-y-4">
-          <div>
-            <label className="block font-medium">Name *</label>
-            <input
-              type="text"
-              name="name"
-              className="w-full border rounded p-2"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            />
-            {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
-          </div>
-
-          <div>
-            <label className="block font-medium">Address *</label>
-            <input
-              type="text"
-              name="address"
-              className="w-full border rounded p-2"
-              value={formData.address}
-              onChange={(e) => setFormData({ ...formData, address: e.target.value })}
-            />
-            {errors.address && <p className="text-red-500 text-sm">{errors.address}</p>}
-          </div>
-
-          <div>
-            <label className="block font-medium">Phone *</label>
-            <input
-              type="text"
-              name="phone"
-              className="w-full border rounded p-2"
-              value={formData.phone}
-              onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-            />
-            {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
-          </div>
-        </div>
-      </div>
-
-      {/* ✅ Place Order Button */}
-      <button
-        onClick={handlePlaceOrder}
-        className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700"
-      >
-        Place Order
-      </button>
+      {/* You can keep your Shipping Details + Place Order logic here */}
     </div>
   );
-}
+};
+
+export default Checkout;
