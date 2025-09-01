@@ -1,89 +1,98 @@
-import React, { useState, useEffect } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
+import { useState } from "react";
 
-export default function Checkout() {
+const API_URL = "https://freshbasket-backend-upwe.onrender.com";
+
+const Checkout = () => {
   const location = useLocation();
-  const [cartItems, setCartItems] = useState(location.state?.cartItems || []);
-  const [name, setName] = useState("");
-  const [address, setAddress] = useState("");
-  const [phone, setPhone] = useState("");
-  const [message, setMessage] = useState("");
+  const navigate = useNavigate();
+  const { cartItems = [] } = location.state || {};
 
-  useEffect(() => {
-    if (cartItems.length === 0) {
-      // fallback if no cart passed via navigate
-      axios.get("http://localhost:5000/api/cart")
-        .then(res => setCartItems(res.data))
-        .catch(err => console.error(err));
-    }
-  }, []);
+  const [form, setForm] = useState({ name: "", address: "", phone: "" });
+
+  const handleChange = (e) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
+  };
 
   const handlePlaceOrder = async () => {
     try {
-      const res = await axios.post("http://localhost:5000/api/orders", {
-        customer: { name, address, phone },
-        items: cartItems,
+      // Save checkout details
+      await axios.post(`${API_URL}/api/checkout`, {
+        Name: form.name,
+        Address: form.address,
+        Phone: form.phone,
       });
 
-      setMessage("✅ Order placed successfully!");
-      setCartItems([]); // clear UI cart
+      // Remove purchased items from cart in backend
+      for (let item of cartItems) {
+        await axios.delete(`${API_URL}/api/cart/${item._id}`);
+      }
+
+      alert("Order placed successfully!");
+      navigate("/"); // redirect back to home or products
     } catch (err) {
-      console.error(err);
-      setMessage("❌ Failed to place order.");
+      console.error("Error placing order:", err);
+      alert("Failed to place order");
     }
   };
 
   return (
-    <div className="p-6">
-      <h2 className="text-xl font-bold mb-4">Checkout</h2>
+    <div className="p-8 bg-gray-100 min-h-screen">
+      <h1 className="text-3xl font-bold mb-6 text-center">Checkout</h1>
 
       {cartItems.length === 0 ? (
-        <p>Your cart is empty.</p>
+        <p className="text-center">Your cart is empty.</p>
       ) : (
-        <div>
-          <ul className="mb-4">
+        <div className="max-w-3xl mx-auto space-y-6">
+          {/* Order Summary */}
+          <div className="bg-white shadow rounded-lg p-4">
+            <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
             {cartItems.map((item) => (
-              <li key={item._id} className="border-b py-2">
-                {item.productName} × {item.quantity} — ₹{item.price}
-              </li>
+              <p key={item._id}>
+                {item.productName} × {item.quantity} = ₹
+                {item.price * item.quantity}
+              </p>
             ))}
-          </ul>
-
-          <div className="mb-3">
-            <input
-              type="text"
-              placeholder="Name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              className="border p-2 w-full mb-2"
-            />
-            <input
-              type="text"
-              placeholder="Address"
-              value={address}
-              onChange={(e) => setAddress(e.target.value)}
-              className="border p-2 w-full mb-2"
-            />
-            <input
-              type="text"
-              placeholder="Phone"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              className="border p-2 w-full mb-2"
-            />
           </div>
 
-          <button
-            onClick={handlePlaceOrder}
-            className="bg-green-600 text-white px-4 py-2 rounded"
-          >
-            Place Order
-          </button>
-
-          {message && <p className="mt-3 font-semibold">{message}</p>}
+          {/* Checkout Form */}
+          <div className="bg-white shadow rounded-lg p-4 space-y-4">
+            <input
+              type="text"
+              name="name"
+              placeholder="Full Name"
+              value={form.name}
+              onChange={handleChange}
+              className="w-full border rounded px-3 py-2"
+            />
+            <input
+              type="text"
+              name="address"
+              placeholder="Address"
+              value={form.address}
+              onChange={handleChange}
+              className="w-full border rounded px-3 py-2"
+            />
+            <input
+              type="text"
+              name="phone"
+              placeholder="Phone Number"
+              value={form.phone}
+              onChange={handleChange}
+              className="w-full border rounded px-3 py-2"
+            />
+            <button
+              onClick={handlePlaceOrder}
+              className="bg-green-600 text-white px-6 py-3 rounded hover:bg-green-700 transition"
+            >
+              Place Order
+            </button>
+          </div>
         </div>
       )}
     </div>
   );
-}
+};
+
+export default Checkout;
