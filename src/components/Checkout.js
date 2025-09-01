@@ -1,122 +1,149 @@
-import { useLocation } from "react-router-dom";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { useState } from "react";
 
 const API_URL = "https://freshbasket-backend-upwe.onrender.com";
 
-const Checkout = () => {
-  const location = useLocation();
-  const { cartItems = [] } = location.state || {};
+export default function Checkout() {
+  const [cartItems, setCartItems] = useState([]);
+  const [formData, setFormData] = useState({
+    name: "",
+    address: "",
+    phone: "",
+  });
+  const [errors, setErrors] = useState({});
+  const [orderPlaced, setOrderPlaced] = useState(false);
 
-  const [form, setForm] = useState({ name: "", address: "", phone: "" });
-  const [error, setError] = useState("");
-  const [showToast, setShowToast] = useState(false);
+  // ✅ Fetch Cart Items
+  useEffect(() => {
+    const fetchCart = async () => {
+      try {
+        const res = await axios.get(`${API_URL}/api/cart`);
+        setCartItems(res.data);
+      } catch (err) {
+        console.error("Error fetching cart:", err);
+      }
+    };
+    fetchCart();
+  }, []);
 
+  // ✅ Handle Form Input
   const handleChange = (e) => {
-    setForm({ ...form, [e.target.name]: e.target.value });
-    setError(""); // clear error when typing
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: "" });
   };
 
+  // ✅ Place Order
   const handlePlaceOrder = async () => {
-    // ✅ Validate form
-    if (!form.name || !form.address || !form.phone) {
-      setError("⚠️ Please fill all the fields before placing order.");
+    let newErrors = {};
+    if (!formData.name) newErrors.name = "Name is required";
+    if (!formData.address) newErrors.address = "Address is required";
+    if (!formData.phone) newErrors.phone = "Phone is required";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
       return;
     }
 
     try {
-      // Save checkout details
-      await axios.post(`${API_URL}/api/checkout`, {
-        Name: form.name,
-        Address: form.address,
-        Phone: form.phone,
+      await axios.post(`${API_URL}/api/orders`, {
+        customer: formData,
+        items: cartItems,
       });
 
-      // Remove purchased items from cart in backend
-      for (let item of cartItems) {
-        await axios.delete(`${API_URL}/api/cart/${item._id}`);
-      }
+      // ✅ Clear cart after order
+      await axios.delete(`${API_URL}/api/cart/clear`);
 
-      // Show success toast
-      setShowToast(true);
-      setForm({ name: "", address: "", phone: "" });
-
-      // Hide toast after 3 seconds
-      setTimeout(() => {
-        setShowToast(false);
-      }, 3000);
+      setOrderPlaced(true); // Show green success screen
     } catch (err) {
       console.error("Error placing order:", err);
-      setError("❌ Failed to place order, please try again.");
     }
   };
 
+  if (orderPlaced) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-green-600 text-white text-center">
+        <div>
+          <h1 className="text-3xl font-bold mb-4">🎉 Order Placed Successfully!</h1>
+          <p className="text-lg">Thanks for shopping with FreshBasket 🛒</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="p-8 bg-gray-100 min-h-screen relative">
-      <h1 className="text-3xl font-bold mb-6 text-center">Checkout</h1>
+    <div className="max-w-3xl mx-auto p-6">
+      <h1 className="text-2xl font-bold text-center mb-6">Checkout</h1>
 
-      {cartItems.length === 0 ? (
-        <p className="text-center">Your cart is empty.</p>
-      ) : (
-        <div className="max-w-3xl mx-auto space-y-6">
-          {/* Order Summary */}
-          <div className="bg-white shadow rounded-lg p-4">
-            <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
-            {cartItems.map((item) => (
-              <p key={item._id}>
-                {item.productName} × {item.quantity} = ₹
-                {item.price * item.quantity}
+      {/* ✅ Order Summary */}
+      <div className="bg-white shadow rounded-lg p-4 mb-6">
+        <h2 className="text-xl font-semibold mb-4">Order Summary</h2>
+        {cartItems.length === 0 ? (
+          <p className="text-gray-500">Your cart is empty.</p>
+        ) : (
+          cartItems.map((item) => (
+            <div key={item._id} className="flex items-center space-x-3 mb-2">
+              <img
+                src={item.image}
+                alt={item.productName}
+                className="w-12 h-12 object-cover rounded"
+              />
+              <p>
+                {item.productName} × {item.quantity} = ₹{item.price * item.quantity}
               </p>
-            ))}
-          </div>
+            </div>
+          ))
+        )}
+      </div>
 
-          {/* Checkout Form */}
-          <div className="bg-white shadow rounded-lg p-4 space-y-4">
+      {/* ✅ Checkout Form */}
+      <div className="bg-white shadow rounded-lg p-4 mb-6">
+        <h2 className="text-xl font-semibold mb-4">Shipping Details</h2>
+        <div className="space-y-4">
+          <div>
+            <label className="block font-medium">Name *</label>
             <input
               type="text"
               name="name"
-              placeholder="Full Name *"
-              value={form.name}
+              className="w-full border rounded p-2"
+              value={formData.name}
               onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
             />
+            {errors.name && <p className="text-red-500 text-sm">{errors.name}</p>}
+          </div>
+
+          <div>
+            <label className="block font-medium">Address *</label>
             <input
               type="text"
               name="address"
-              placeholder="Address *"
-              value={form.address}
+              className="w-full border rounded p-2"
+              value={formData.address}
               onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
             />
+            {errors.address && <p className="text-red-500 text-sm">{errors.address}</p>}
+          </div>
+
+          <div>
+            <label className="block font-medium">Phone *</label>
             <input
               type="text"
               name="phone"
-              placeholder="Phone Number *"
-              value={form.phone}
+              className="w-full border rounded p-2"
+              value={formData.phone}
               onChange={handleChange}
-              className="w-full border rounded px-3 py-2"
             />
-
-            {error && <p className="text-red-600 text-sm">{error}</p>}
-
-            <button
-              onClick={handlePlaceOrder}
-              className="bg-green-600 text-white px-6 py-3 rounded hover:bg-green-700 transition"
-            >
-              Place Order
-            </button>
+            {errors.phone && <p className="text-red-500 text-sm">{errors.phone}</p>}
           </div>
         </div>
-      )}
+      </div>
 
-      {/* ✅ Toast Popup */}
-      {showToast && (
-        <div className="fixed top-5 right-5 bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg animate-bounce">
-          🎉 Order placed successfully! <br /> Thanks for shopping with <b>FreshBasket</b> 🛒
-        </div>
-      )}
+      {/* ✅ Place Order Button */}
+      <button
+        onClick={handlePlaceOrder}
+        className="w-full bg-green-600 text-white py-3 rounded-lg font-semibold hover:bg-green-700"
+      >
+        Place Order
+      </button>
     </div>
   );
-};
-
-export default Checkout;
+}
