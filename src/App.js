@@ -5,7 +5,7 @@ import axios from "axios";
 import Header from "./components/Header";
 import Products from "./pages/Products";
 import Cart from "./pages/Cart";
-import Checkout from "./pages/Checkout";
+import Checkout from "./components/Checkout";
 
 const API_URL = "https://freshbasket-backend-upwe.onrender.com";
 
