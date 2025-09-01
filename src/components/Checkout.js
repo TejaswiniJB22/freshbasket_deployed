@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 const API_URL = "https://freshbasket-backend-upwe.onrender.com";
 
 const Checkout = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [cartItems, setCartItems] = useState([]);
   const [formData, setFormData] = useState({
     name: "",
@@ -36,13 +37,28 @@ const Checkout = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // ✅ Place order (simple simulation)
+  // ✅ Place order
   const handlePlaceOrder = () => {
     if (!formData.name || !formData.address || !formData.phone) {
       alert("Please fill in all required fields.");
       return;
     }
+
+    // Remove ordered items only from frontend cart
+    if (location.state?.cartItems) {
+      // If Buy Now → remove only that product
+      setCartItems([]);
+    } else {
+      // If Checkout All → clear whole cart
+      setCartItems([]);
+    }
+
     setOrderPlaced(true);
+
+    // ✅ After showing success screen, navigate back to cart after 2s
+    setTimeout(() => {
+      navigate("/cart", { state: { updatedCart: cartItems } });
+    }, 2000);
   };
 
   if (orderPlaced) {
@@ -51,7 +67,7 @@ const Checkout = () => {
         <h1 className="text-3xl font-bold text-green-700 mb-4">
           🎉 Order Placed Successfully!
         </h1>
-        <p className="text-lg text-gray-700">Thank you for shopping with us.</p>
+        <p className="text-lg text-gray-700">Thank you for shopping with FreshBasket.</p>
       </div>
     );
   }
