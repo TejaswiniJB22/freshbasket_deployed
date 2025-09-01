@@ -72,15 +72,8 @@ const Cart = () => {
                 <button
                   onClick={() =>
                     navigate("/checkout", {
-                      state: {
-                        cartItems: [item],
-                        onOrderComplete: () => {
-                          // ✅ Remove only this product after order
-                          setCartItems((prev) =>
-                            prev.filter((p) => p._id !== item._id)
-                          );
-                        },
-                      },
+                      replace: true,
+                      state: { cartItems: [item] },
                     })
                   }
                   className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
@@ -99,15 +92,7 @@ const Cart = () => {
             </p>
             <button
               onClick={() =>
-                navigate("/checkout", {
-                  state: {
-                    cartItems,
-                    onOrderComplete: () => {
-                      // ✅ Clear all items after order
-                      setCartItems([]);
-                    },
-                  },
-                })
+                navigate("/checkout", { replace: true, state: { cartItems } })
               }
               className="bg-blue-600 text-white px-6 py-3 rounded mt-4 sm:mt-0 hover:bg-blue-700 transition"
             >
