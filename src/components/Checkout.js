@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useLocation } from "react-router-dom";
@@ -14,7 +13,7 @@ export default function Checkout() {
   const [errors, setErrors] = useState({});
   const [orderPlaced, setOrderPlaced] = useState(false);
 
-  // ✅ Fetch Cart only if not BuyNow
+  // ✅ Fetch cart only if NOT buyNow
   useEffect(() => {
     if (!buyNowItem) {
       const fetchCart = async () => {
@@ -29,9 +28,9 @@ export default function Checkout() {
     }
   }, [buyNowItem]);
 
+  // ✅ If buyNow, show only that item, else show cart
   const itemsToShow = buyNowItem ? [buyNowItem] : cartItems;
 
-  // ✅ Place Order
   const handlePlaceOrder = async () => {
     let newErrors = {};
     if (!formData.name) newErrors.name = "Name is required";
