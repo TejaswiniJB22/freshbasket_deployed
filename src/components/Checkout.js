@@ -1,153 +1,89 @@
-import React, { useState } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 
-const API_URL = "https://freshbasket-backend-upwe.onrender.com";
-
-const Checkout = () => {
+export default function Checkout() {
   const location = useLocation();
-  const navigate = useNavigate();
-  const cartItems = location.state?.cartItems || [];
+  const [cartItems, setCartItems] = useState(location.state?.cartItems || []);
+  const [name, setName] = useState("");
+  const [address, setAddress] = useState("");
+  const [phone, setPhone] = useState("");
+  const [message, setMessage] = useState("");
 
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    address: "",
-  });
+  useEffect(() => {
+    if (cartItems.length === 0) {
+      // fallback if no cart passed via navigate
+      axios.get("http://localhost:5000/api/cart")
+        .then(res => setCartItems(res.data))
+        .catch(err => console.error(err));
+    }
+  }, []);
 
-  const [successMessage, setSuccessMessage] = useState("");
-
-  const totalPrice = cartItems.reduce(
-    (acc, item) => acc + item.price * item.quantity,
-    0
-  );
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  const handlePlaceOrder = async () => {
     try {
-      // Send order to backend
-      await axios.post(`${API_URL}/api/orders`, {
-        customer: formData,
+      const res = await axios.post("http://localhost:5000/api/orders", {
+        customer: { name, address, phone },
         items: cartItems,
-        total: totalPrice,
       });
 
-      // Remove items from cart after placing order
-      await Promise.all(
-        cartItems.map((item) => axios.delete(`${API_URL}/api/cart/${item._id}`))
-      );
-
-      setSuccessMessage("Order placed successfully! 🎉");
-      setFormData({ name: "", email: "", phone: "", address: "" });
-
-      // Redirect after delay
-      setTimeout(() => {
-        navigate("/");
-      }, 2000);
-    } catch (error) {
-      console.error("Order failed:", error);
-      alert("Something went wrong. Please try again.");
+      setMessage("✅ Order placed successfully!");
+      setCartItems([]); // clear UI cart
+    } catch (err) {
+      console.error(err);
+      setMessage("❌ Failed to place order.");
     }
   };
 
   return (
-    <div className="p-8 bg-gray-100 min-h-screen">
-      <h1 className="text-3xl font-bold mb-6 text-center">Checkout</h1>
+    <div className="p-6">
+      <h2 className="text-xl font-bold mb-4">Checkout</h2>
 
       {cartItems.length === 0 ? (
-        <p className="text-center text-gray-600">No items to checkout.</p>
+        <p>Your cart is empty.</p>
       ) : (
-        <div className="space-y-6 max-w-4xl mx-auto">
-          {/* Order Summary */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-2xl font-semibold mb-4">Order Summary</h2>
+        <div>
+          <ul className="mb-4">
             {cartItems.map((item) => (
-              <div key={item._id} className="flex items-center justify-between mb-4">
-                <div className="flex items-center">
-                  <img
-                    src={`${API_URL}/Images/${item.image}`}
-                    alt={item.productName}
-                    className="h-16 w-16 object-contain rounded mr-4"
-                  />
-                  <div>
-                    <h3 className="font-medium">{item.productName}</h3>
-                    <p className="text-gray-600 text-sm">
-                      {item.quantity} × ₹{item.price} = ₹
-                      {item.quantity * item.price}
-                    </p>
-                  </div>
-                </div>
-              </div>
+              <li key={item._id} className="border-b py-2">
+                {item.productName} × {item.quantity} — ₹{item.price}
+              </li>
             ))}
-            <div className="mt-4 text-right font-bold text-xl">
-              Total: <span className="text-green-600">₹{totalPrice}</span>
-            </div>
+          </ul>
+
+          <div className="mb-3">
+            <input
+              type="text"
+              placeholder="Name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="border p-2 w-full mb-2"
+            />
+            <input
+              type="text"
+              placeholder="Address"
+              value={address}
+              onChange={(e) => setAddress(e.target.value)}
+              className="border p-2 w-full mb-2"
+            />
+            <input
+              type="text"
+              placeholder="Phone"
+              value={phone}
+              onChange={(e) => setPhone(e.target.value)}
+              className="border p-2 w-full mb-2"
+            />
           </div>
 
-          {/* Billing Form */}
-          <div className="bg-white rounded-lg shadow p-6">
-            <h2 className="text-2xl font-semibold mb-4">Billing Details</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <input
-                type="text"
-                name="name"
-                placeholder="Full Name"
-                value={formData.name}
-                onChange={handleChange}
-                className="w-full p-3 border rounded"
-                required
-              />
-              <input
-                type="email"
-                name="email"
-                placeholder="Email Address"
-                value={formData.email}
-                onChange={handleChange}
-                className="w-full p-3 border rounded"
-                required
-              />
-              <input
-                type="tel"
-                name="phone"
-                placeholder="Phone Number"
-                value={formData.phone}
-                onChange={handleChange}
-                className="w-full p-3 border rounded"
-                required
-              />
-              <textarea
-                name="address"
-                placeholder="Shipping Address"
-                value={formData.address}
-                onChange={handleChange}
-                className="w-full p-3 border rounded"
-                rows="3"
-                required
-              ></textarea>
+          <button
+            onClick={handlePlaceOrder}
+            className="bg-green-600 text-white px-4 py-2 rounded"
+          >
+            Place Order
+          </button>
 
-              <button
-                type="submit"
-                className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 transition"
-              >
-                Place Order
-              </button>
-            </form>
-
-            {successMessage && (
-              <div className="mt-4 p-4 bg-green-100 text-green-700 rounded text-center font-medium">
-                {successMessage}
-              </div>
-            )}
-          </div>
+          {message && <p className="mt-3 font-semibold">{message}</p>}
         </div>
       )}
     </div>
   );
-};
-
-export default Checkout;
+}
