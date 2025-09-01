@@ -24,7 +24,7 @@ const Cart = () => {
   const removeItem = async (id) => {
     try {
       await axios.delete(`${API_URL}/api/cart/${id}`);
-      fetchCart(); // refresh cart instantly
+      fetchCart();
     } catch (err) {
       console.error("Error removing item:", err);
     }
@@ -43,10 +43,7 @@ const Cart = () => {
       ) : (
         <div className="space-y-4 max-w-5xl mx-auto">
           {cartItems.map((item) => (
-            <div
-              key={item._id}
-              className="flex flex-col sm:flex-row items-center bg-white rounded-lg shadow p-4"
-            >
+            <div key={item._id} className="flex flex-col sm:flex-row items-center bg-white rounded-lg shadow p-4">
               <img
                 src={`${API_URL}/Images/${item.image}`}
                 alt={item.productName}
@@ -56,32 +53,17 @@ const Cart = () => {
                 <h2 className="font-semibold text-lg">{item.productName}</h2>
                 <p className="text-gray-600 text-sm">{item.description}</p>
                 <p className="mt-2 font-bold">
-                  ₹{item.price} × {item.quantity} = ₹
-                  {item.price * item.quantity}
+                  ₹{item.price} × {item.quantity} = ₹{item.price * item.quantity}
                 </p>
               </div>
-
-              <div className="flex flex-col gap-2">
-                <button
-                  onClick={() => removeItem(item._id)}
-                  className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition"
-                >
-                  Remove
-                </button>
-                {/* ✅ Buy Now (single item checkout) */}
-                <button
-                  onClick={() =>
-                    navigate("/checkout", { state: { cartItems: [item] } })
-                  }
-                  className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
-                >
-                  Buy Now
-                </button>
-              </div>
+              <button
+                onClick={() => removeItem(item._id)}
+                className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition mt-2 sm:mt-0"
+              >
+                Remove
+              </button>
             </div>
           ))}
-
-          {/* ✅ Checkout All */}
           <div className="mt-6 flex flex-col sm:flex-row justify-between items-center bg-white rounded-lg shadow p-4">
             <p className="text-xl font-bold">
               Total ({cartItems.length} items):{" "}
@@ -91,7 +73,7 @@ const Cart = () => {
               onClick={() => navigate("/checkout", { state: { cartItems } })}
               className="bg-blue-600 text-white px-6 py-3 rounded mt-4 sm:mt-0 hover:bg-blue-700 transition"
             >
-              Checkout All
+              Checkout
             </button>
           </div>
         </div>
@@ -101,4 +83,3 @@ const Cart = () => {
 };
 
 export default Cart;
-
