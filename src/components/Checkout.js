@@ -7,14 +7,18 @@ const API_URL = "https://freshbasket-backend-upwe.onrender.com";
 const Checkout = () => {
   const location = useLocation();
   const [cartItems, setCartItems] = useState([]);
+  const [formData, setFormData] = useState({
+    name: "",
+    address: "",
+    phone: "",
+  });
+  const [orderPlaced, setOrderPlaced] = useState(false);
 
-  // Read items passed from Cart.js
+  // ✅ Load items from Cart.js or fallback to full cart
   useEffect(() => {
     if (location.state?.cartItems) {
-      // ✅ Use items sent from Cart (either single Buy Now or full cart)
       setCartItems(location.state.cartItems);
     } else {
-      // ✅ Fallback: fetch full cart if nothing passed
       const fetchCart = async () => {
         try {
           const res = await axios.get(`${API_URL}/api/cart`);
@@ -27,11 +31,36 @@ const Checkout = () => {
     }
   }, [location.state]);
 
+  // ✅ Handle form input change
+  const handleChange = (e) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  // ✅ Place order (simple simulation)
+  const handlePlaceOrder = () => {
+    if (!formData.name || !formData.address || !formData.phone) {
+      alert("Please fill in all required fields.");
+      return;
+    }
+    setOrderPlaced(true);
+  };
+
+  if (orderPlaced) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen bg-green-50">
+        <h1 className="text-3xl font-bold text-green-700 mb-4">
+          🎉 Order Placed Successfully!
+        </h1>
+        <p className="text-lg text-gray-700">Thank you for shopping with us.</p>
+      </div>
+    );
+  }
+
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
       <h1 className="text-2xl font-bold mb-6 text-center">Checkout</h1>
 
-      {/* Order Summary */}
+      {/* ✅ Order Summary */}
       <div className="bg-white rounded-lg shadow p-6 mb-6">
         <h2 className="text-lg font-semibold mb-4">Order Summary</h2>
         {cartItems.map((item) => (
@@ -52,7 +81,52 @@ const Checkout = () => {
         ))}
       </div>
 
-      {/* You can keep your Shipping Details + Place Order logic here */}
+      {/* ✅ Shipping Form */}
+      <div className="bg-white rounded-lg shadow p-6">
+        <h2 className="text-lg font-semibold mb-4">Shipping Details</h2>
+        <form className="space-y-4">
+          <div>
+            <label className="block font-medium">Name *</label>
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              className="w-full border rounded p-2"
+              required
+            />
+          </div>
+          <div>
+            <label className="block font-medium">Address *</label>
+            <input
+              type="text"
+              name="address"
+              value={formData.address}
+              onChange={handleChange}
+              className="w-full border rounded p-2"
+              required
+            />
+          </div>
+          <div>
+            <label className="block font-medium">Phone *</label>
+            <input
+              type="text"
+              name="phone"
+              value={formData.phone}
+              onChange={handleChange}
+              className="w-full border rounded p-2"
+              required
+            />
+          </div>
+          <button
+            type="button"
+            onClick={handlePlaceOrder}
+            className="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition"
+          >
+            Place Order
+          </button>
+        </form>
+      </div>
     </div>
   );
 };
