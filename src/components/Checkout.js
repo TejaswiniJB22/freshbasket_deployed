@@ -1,4 +1,4 @@
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import axios from "axios";
 import { useState } from "react";
 
@@ -6,10 +6,10 @@ const API_URL = "https://freshbasket-backend-upwe.onrender.com";
 
 const Checkout = () => {
   const location = useLocation();
-  const navigate = useNavigate();
   const { cartItems = [] } = location.state || {};
 
   const [form, setForm] = useState({ name: "", address: "", phone: "" });
+  const [orderPlaced, setOrderPlaced] = useState(false);
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -29,13 +29,25 @@ const Checkout = () => {
         await axios.delete(`${API_URL}/api/cart/${item._id}`);
       }
 
-      alert("Order placed successfully!");
-      navigate("/"); // redirect back to home or products
+      // Show success message
+      setOrderPlaced(true);
     } catch (err) {
       console.error("Error placing order:", err);
       alert("Failed to place order");
     }
   };
+
+  // ✅ If order placed, show green success message instead of form
+  if (orderPlaced) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-green-100">
+        <div className="bg-green-600 text-white p-10 rounded-2xl shadow-lg text-center">
+          <h1 className="text-3xl font-bold mb-4">🎉 Order Placed Successfully!</h1>
+          <p className="text-lg">Thanks for shopping with <span className="font-semibold">FreshBasket</span> 🛒</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-8 bg-gray-100 min-h-screen">
