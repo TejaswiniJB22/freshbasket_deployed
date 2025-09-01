@@ -1,5 +1,8 @@
 import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
+
+const API_URL = "https://freshbasket-backend-upwe.onrender.com";
 
 const Checkout = () => {
   const location = useLocation();
@@ -24,21 +27,32 @@ const Checkout = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    try {
+      // Send order to backend
+      await axios.post(`${API_URL}/api/orders`, {
+        customer: formData,
+        items: cartItems,
+        total: totalPrice,
+      });
 
-    // Normally you would send order details to backend here
-    console.log("Order Placed:", { ...formData, cartItems });
+      // Remove items from cart after placing order
+      await Promise.all(
+        cartItems.map((item) => axios.delete(`${API_URL}/api/cart/${item._id}`))
+      );
 
-    setSuccessMessage("Order placed successfully! 🎉");
+      setSuccessMessage("Order placed successfully! 🎉");
+      setFormData({ name: "", email: "", phone: "", address: "" });
 
-    // Clear form after order
-    setFormData({ name: "", email: "", phone: "", address: "" });
-
-    // Redirect after few seconds
-    setTimeout(() => {
-      navigate("/");
-    }, 2000);
+      // Redirect after delay
+      setTimeout(() => {
+        navigate("/");
+      }, 2000);
+    } catch (error) {
+      console.error("Order failed:", error);
+      alert("Something went wrong. Please try again.");
+    }
   };
 
   return (
@@ -53,13 +67,10 @@ const Checkout = () => {
           <div className="bg-white rounded-lg shadow p-6">
             <h2 className="text-2xl font-semibold mb-4">Order Summary</h2>
             {cartItems.map((item) => (
-              <div
-                key={item._id}
-                className="flex items-center justify-between mb-4"
-              >
+              <div key={item._id} className="flex items-center justify-between mb-4">
                 <div className="flex items-center">
                   <img
-                    src={`https://freshbasket-backend-upwe.onrender.com/Images/${item.image}`}
+                    src={`${API_URL}/Images/${item.image}`}
                     alt={item.productName}
                     className="h-16 w-16 object-contain rounded mr-4"
                   />
@@ -127,7 +138,6 @@ const Checkout = () => {
               </button>
             </form>
 
-            {/* Success Message */}
             {successMessage && (
               <div className="mt-4 p-4 bg-green-100 text-green-700 rounded text-center font-medium">
                 {successMessage}
