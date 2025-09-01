@@ -17,7 +17,8 @@ const Checkout = () => {
 
   // ✅ Load items from Cart.js or fallback to full cart
   useEffect(() => {
-    if (location.state?.cartItems) {
+    console.log("Checkout received state:", location.state);
+    if (location.state?.cartItems && location.state.cartItems.length > 0) {
       setCartItems(location.state.cartItems);
     } else {
       const fetchCart = async () => {
@@ -44,20 +45,11 @@ const Checkout = () => {
       return;
     }
 
-    // Remove ordered items only from frontend cart
-    if (location.state?.cartItems) {
-      // If Buy Now → remove only that product
-      setCartItems([]);
-    } else {
-      // If Checkout All → clear whole cart
-      setCartItems([]);
-    }
-
     setOrderPlaced(true);
 
     // ✅ After showing success screen, navigate back to cart after 2s
     setTimeout(() => {
-      navigate("/cart", { state: { updatedCart: cartItems } });
+      navigate("/cart");
     }, 2000);
   };
 
@@ -67,7 +59,9 @@ const Checkout = () => {
         <h1 className="text-3xl font-bold text-green-700 mb-4">
           🎉 Order Placed Successfully!
         </h1>
-        <p className="text-lg text-gray-700">Thank you for shopping with FreshBasket.</p>
+        <p className="text-lg text-gray-700">
+          Thank you for shopping with FreshBasket.
+        </p>
       </div>
     );
   }
