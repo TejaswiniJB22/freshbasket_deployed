@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import axios from "axios";
 
-import Header from "./components/Header";
+import Header from "./pages/Header";
 import Products from "./pages/Products";
 import Cart from "./pages/Cart";
 import Checkout from "./components/Checkout.js";
