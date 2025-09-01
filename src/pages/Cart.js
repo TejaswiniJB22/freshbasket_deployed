@@ -70,7 +70,19 @@ const Cart = () => {
                   Remove
                 </button>
                 <button
-                  onClick={() => navigate("/checkout", { state: { cartItems: [item] } })}
+                  onClick={() =>
+                    navigate("/checkout", {
+                      state: {
+                        cartItems: [item],
+                        onOrderComplete: () => {
+                          // ✅ Remove only this product after order
+                          setCartItems((prev) =>
+                            prev.filter((p) => p._id !== item._id)
+                          );
+                        },
+                      },
+                    })
+                  }
                   className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 transition"
                 >
                   Buy Now
@@ -86,7 +98,17 @@ const Cart = () => {
               <span className="text-green-600">₹{totalPrice}</span>
             </p>
             <button
-              onClick={() => navigate("/checkout", { state: { cartItems } })}
+              onClick={() =>
+                navigate("/checkout", {
+                  state: {
+                    cartItems,
+                    onOrderComplete: () => {
+                      // ✅ Clear all items after order
+                      setCartItems([]);
+                    },
+                  },
+                })
+              }
               className="bg-blue-600 text-white px-6 py-3 rounded mt-4 sm:mt-0 hover:bg-blue-700 transition"
             >
               Checkout All
