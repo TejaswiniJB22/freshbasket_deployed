@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { HiMenu, HiX } from "react-icons/hi"; 
-import { FaShoppingCart } from "react-icons/fa"; 
+import { HiMenu, HiX } from "react-icons/hi";
+import { FaShoppingCart } from "react-icons/fa";
 import axios from "axios";
 
 const API_URL = "https://freshbasket-backend-upwe.onrender.com";
@@ -25,13 +25,22 @@ const Header = () => {
   }, []);
 
   return (
-    <nav className="bg-black shadow-md px-4 sm:px-10 py-4">
+    <nav className="bg-white shadow-md px-4 sm:px-10 py-4">
       <div className="flex justify-between items-center">
+        {/* Logo */}
         <div className="flex items-center space-x-2">
-          <img src="/apple.jpeg" alt="Fresh Basket Logo" className="w-8 h-8 object-contain" />
-          <span className="text-white font-bold text-2xl">Fresh_Basket</span>
+          <img
+            src="/apple.jpeg"
+            alt="Fresh Basket Logo"
+            className="w-8 h-8 object-contain"
+          />
+          <span className="text-green-600 font-bold text-2xl">
+            Fresh_Basket
+          </span>
         </div>
-        <ul className="hidden md:flex space-x-8 text-white font-medium items-center">
+
+        {/* Desktop Menu */}
+        <ul className="hidden md:flex space-x-8 text-green-700 font-medium items-center">
           <li><Link to="/">Home</Link></li>
           <li><Link to="/about">About</Link></li>
           <li><Link to="/products">Products</Link></li>
@@ -48,12 +57,19 @@ const Header = () => {
             </Link>
           </li>
         </ul>
-        <div className="md:hidden text-white text-2xl cursor-pointer" onClick={() => setIsOpen(!isOpen)}>
+
+        {/* Mobile Hamburger */}
+        <div
+          className="md:hidden text-green-700 text-2xl cursor-pointer"
+          onClick={() => setIsOpen(!isOpen)}
+        >
           {isOpen ? <HiX /> : <HiMenu />}
         </div>
       </div>
+
+      {/* Mobile Dropdown */}
       {isOpen && (
-        <ul className="flex flex-col mt-4 space-y-4 text-white font-medium md:hidden">
+        <ul className="flex flex-col mt-4 space-y-4 text-green-700 font-medium md:hidden">
           <li><Link to="/" onClick={() => setIsOpen(false)}>Home</Link></li>
           <li><Link to="/about" onClick={() => setIsOpen(false)}>About</Link></li>
           <li><Link to="/products" onClick={() => setIsOpen(false)}>Products</Link></li>
